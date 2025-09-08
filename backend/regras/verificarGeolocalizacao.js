@@ -1,22 +1,42 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch"); // Certifique-se de ter 'node-fetch' instalado com "npm install node-fetch@2"
 
-async function verificarGeolocalizacao(ip, paisDeclarado) {
+/**
+ * Verifica se o país de origem do IP corresponde ao país declarado.
+ * Esta é uma regra ASSÍNCRONA, pois faz uma chamada para uma API externa.
+ */
+async function verificarGeolocalizacao(dados) {
+  const suspeitas = [];
+  const ip = dados.ip;
+  const paisDeclarado = dados.pais;
+
+  // Só podemos verificar se um IP for fornecido
+  if (!ip || ip === "127.0.0.1") {
+    return suspeitas;
+  }
+
   try {
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode,status,message`);
+    const response = await fetch(
+      `http://ip-api.com/json/${ip}?fields=countryCode,status,message`
+    );
     const data = await response.json();
 
-    if (data.status !== 'success') {
-      return { aprovado: false, motivo: `Erro ao consultar IP: ${data.message}` };
+    if (data.status !== "success") {
+      console.warn(
+        `Aviso: A API de geolocalização falhou para o IP ${ip}. Motivo: ${data.message}`
+      );
+      return suspeitas; // Retorna sem suspeitas, pois a falha pode ser da API externa
     }
 
-    if (data.countryCode !== paisDeclarado) {
-      return { aprovado: false, motivo: `Discrepância de país: IP indica ${data.countryCode}, declarado ${paisDeclarado}` };
+    if (data.countryCode && data.countryCode !== paisDeclarado) {
+      suspeitas.push(
+        `Discrepância de geolocalização: o IP indica origem de ${data.countryCode}, mas o país declarado foi ${paisDeclarado}.`
+      );
     }
-
-    return { aprovado: true };
   } catch (error) {
-    return { aprovado: false, motivo: 'Erro na verificação de geolocalização' };
+    console.error("Erro crítico ao contatar a API de geolocalização:", error);
   }
+
+  return suspeitas;
 }
 
 module.exports = verificarGeolocalizacao;

@@ -1,38 +1,41 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const bodyParser = require("body-parser");
+const sdkMiddleware = require("./sdk-middleware");
+
 const app = express();
 const PORT = 3000;
 
-const verificarValor = require('./regras/verificarValor');
-const verificarEmail = require('./regras/verificarEmail');
-const verificarCPF = require('./regras/verificarCPF');
-const verificarCartao = require('./regras/verificarCartao');
-const verificarPais = require('./regras/verificarPais');
-const verificarTempo = require('./regras/verificarTempo');
-
 app.use(bodyParser.json());
 
-app.post('/api/verificar', (req, res) => {
-  const transacao = req.body;
+// ROTA CORRIGIDA
+// O middleware (sdkMiddleware) é passado como uma referência de função, sem os parênteses ().
+// Ele será executado primeiro e, quando terminar, chamará a próxima função na fila.
+app.post("/identity/verify", sdkMiddleware, (req, res) => {
+  // Após o sdkMiddleware rodar, o resultado estará em req.sdkResult.
+  // Esta função final apenas envia a resposta de volta ao cliente.
+  res.json(req.sdkResult);
+});
 
-  // Aplica todas as regras de verificação
-  const suspeitas = [
-    ...verificarValor(transacao),
-    ...verificarEmail(transacao),
-    ...verificarCPF(transacao),
-    ...verificarCartao(transacao),
-    ...verificarPais(transacao),
-    ...verificarTempo(transacao),
-  ];
+// Rota de exemplo para checkout, mostrando o reuso do middleware
+app.post("/checkout", sdkMiddleware, (req, res) => {
+  // Aqui podemos adicionar uma lógica extra com base na resposta do SDK
+  if (req.sdkResult.status === "deny") {
+    return res.status(403).json({
+      error: "Transação bloqueada pela análise de risco.",
+      details: req.sdkResult,
+    });
+  }
 
-  // Retorna a resposta com os dados da transação
+  // Se o status for 'allow' ou 'review', a lógica de checkout pode continuar
   res.json({
-    transacao,
-    suspeitas,
-    aprovado: suspeitas.length === 0
+    message: "Checkout em processamento...",
+    analysis: req.sdkResult,
   });
 });
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
+// Exporta o app para que os testes possam usá-lo
+module.exports = app;
