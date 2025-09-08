@@ -1,0 +1,57 @@
+RELATÓRIO TÉCNICO – CHALLENGE HAKAI
+ETAPA 3: MVP (Minimum Viable Product) FUNCIONAL
+1. INTRODUÇÃO
+Este relatório técnico documenta os avanços realizados na terceira etapa do Challenge HAKAI, focada na implementação e validação de um Mínimo Produto Viável (MVP) para o SDK Antifraude. Nas fases anteriores, foi estabelecida a concepção teórica e uma estrutura de código inicial. A presente etapa representa um salto qualitativo, evoluindo de uma prova de conceito para um motor de análise de risco funcional, robusto e arquiteturalmente escalável.
+
+O objetivo desta fase foi refatorar a base de código existente, aplicando padrões de design de software modernos para criar um backend desacoplado, resiliente e testável. O resultado é um serviço de API que pode ser facilmente integrado a qualquer aplicação Node.js e que já executa um conjunto complexo de regras de verificação de forma concorrente e eficiente.
+
+2. EVOLUÇÃO TÉCNICA EM RELAÇÃO À FASE ANTERIOR
+A evolução do projeto entre as fases 1/2 e a fase 3 foi substancial. Abandonamos uma abordagem monolítica e procedural por uma arquitetura orientada a serviços, baseada em middleware. As principais melhorias são:
+
+De Scripts a Middleware: A lógica de verificação, antes centralizada em um script verificar.js, foi completamente refatorada para um middleware do Express.js (sdk-middleware.js). Esta é a mudança mais impactante, pois transforma o SDK em um componente plug-and-play, permitindo que qualquer rota de uma aplicação seja protegida com uma única linha de código, sem acoplar a lógica de negócio à análise de fraude.
+
+Padronização das Regras (Contrato de Interface): Anteriormente, cada regra possuía um formato de retorno distinto (ex: {aprovado, motivo}). Agora, todas as regras aderem a um contrato unificado: recebem um objeto dados completo e retornam uma Promise que resolve para um array de strings (as "suspeitas"). Isso tornou o sistema modular e facilmente extensível.
+
+Execução Concorrente e Assíncrona: A implementação anterior executava as regras de forma sequencial. A nova arquitetura utiliza Promise.all para executar todas as 11 regras de forma concorrente. Isso otimiza drasticamente a performance, pois o tempo de resposta é ditado pela regra mais lenta, e não pela soma de todas. Além disso, o sistema agora suporta nativamente regras que dependem de operações de I/O, como consultas a APIs externas (verificarGeolocalizacao) e leitura de arquivos (verificarHistorico).
+
+Sistema de Scoring e Status: O sistema evoluiu de uma resposta binária (aprovado: true/false) para um modelo de análise mais granular. Agora, a API retorna um score de confiança (0-100) e um status (allow, review, deny), oferecendo à aplicação cliente uma base mais rica para a tomada de decisão.
+
+Resiliência e Tratamento de Erros: Foi implementado um bloco try...catch robusto no middleware. Caso qualquer uma das regras falhe criticamente, o sistema não é interrompido. Ele captura a exceção, registra o erro e, por segurança, retorna um status deny, garantindo a alta disponibilidade do serviço.
+
+3. ARQUITETURA ATUAL DO MÓDULO BACKEND
+A estrutura do projeto foi reorganizada para refletir as melhores práticas de desenvolvimento, separando claramente as responsabilidades.
+
+3.1. Estrutura de Pastas e Arquivos
+A organização atual do backend promove a modularidade e a clareza, facilitando a manutenção e a escalabilidade do projeto.
+
+[INSERIR PRINT DA ESTRUTURA DE PASTAS ATUAL DO PROJETO NO VS CODE AQUI]
+(Legenda: Estrutura de pastas do backend, demonstrando a separação entre servidor (index.js), middleware (sdk-middleware.js), regras e utilitários.)
+
+3.2. Detalhamento Técnico dos Componentes
+O funcionamento do backend é orquestrado por três componentes principais:
+
+index.js (Ponto de Entrada): Atua como a camada de exposição da API. É responsável por inicializar o servidor Express, definir a rota POST /identity/verify e utilizar o sdk-middleware para processar as requisições. Sua única função após a análise do middleware é enviar a resposta JSON final ao cliente.
+
+sdk-middleware.js (Orquestrador de Regras): É o cérebro do sistema. Ele recebe os dados da transação, coordena a execução paralela de todas as 11 regras, agrega os resultados, calcula o score de risco, define o status final (allow, review, deny) e persiste a transação no histórico.
+
+Pasta /regras (Motor de Regras): Contém os módulos especialistas, onde cada arquivo é responsável por uma única verificação (valor, CPF, geolocalização, histórico, etc.). Essa abordagem permite adicionar ou modificar regras de negócio com impacto mínimo no restante do sistema.
+
+4. FERRAMENTA EM USO: EVIDÊNCIAS E LOGS
+Para validar o funcionamento do MVP, foi utilizado um script de teste de integração (testarSDK.js) que simula requisições de um front-end, enviando dados de transações aleatórias para a nossa API. Os logs abaixo demonstram o sistema em pleno funcionamento.
+
+4.1. Log do Servidor em Execução
+O servidor inicia corretamente e se mantém ativo, aguardando por requisições na porta 3000.
+
+[INSERIR PRINT DO TERMINAL MOSTRANDO "Servidor rodando na porta 3000" AQUI]
+(Legenda: Log de inicialização do servidor Node.js/Express.)
+
+4.2. Logs de Testes e Respostas da API
+A execução do script de teste (node backend/testarSDK.js) evidencia a capacidade do motor de analisar diferentes cenários e retornar respostas detalhadas, com status, scores e listas de suspeitas variadas, validando a lógica de todas as regras implementadas.
+
+[INSERIR PRINT DO LOG COMPLETO DA EXECUÇÃO DO testarSDK.js, MOSTRANDO DIFERENTES RESULTADOS (ALLOW, REVIEW, DENY) AQUI]
+(Legenda: Saída do script de teste de integração, demonstrando múltiplas transações sendo analisadas com sucesso pela API e recebendo diferentes classificações de risco.)
+
+5. CONSIDERAÇÕES FINAIS
+A terceira fase do projeto foi concluída com sucesso, resultando em um backend de SDK antifraude que não apenas funciona, mas foi construído sobre uma fundação de software sólida, escalável e de fácil manutenção. A arquitetura de middleware e o motor de regras concorrentes representam uma evolução significativa que posiciona o projeto para o sucesso em suas fases finais.
+
+Os testes de integração validaram que o MVP é robusto e responde corretamente a diversos cenários de risco. Com o backend estabilizado, o próximo passo natural é o desenvolvimento do módulo cliente (front-end), que será responsável por coletar os dados de telemetria do usuário e enviá-los a este motor de análise agora comprovadamente eficaz.
