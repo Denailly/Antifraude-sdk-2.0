@@ -98,5 +98,105 @@
     "pais": "US",
     "tempoTransacaoSegundos": 9,
     "timestamp": 1757315629498
+  },
+  {
+    "nome": "Lucas Pereira",
+    "cpf": "17706992867",
+    "email": "user@example.com",
+    "cartao": "4130086587050256",
+    "valor": 9846,
+    "pais": "CN",
+    "tempoTransacaoSegundos": 113,
+    "timestamp": 1757459275255
+  },
+  {
+    "nome": "Diogo Ramos",
+    "cpf": "17489433997",
+    "email": "cliente@empresa.com",
+    "cartao": "4095592458704055",
+    "valor": 9185,
+    "pais": "US",
+    "tempoTransacaoSegundos": 98,
+    "timestamp": 1757459275265
+  },
+  {
+    "nome": "Diogo Ramos",
+    "cpf": "68522971297",
+    "email": "fraude@suspeito.com",
+    "cartao": "4229261887442737",
+    "valor": 8487,
+    "pais": "BR",
+    "tempoTransacaoSegundos": 113,
+    "timestamp": 1757459275269
+  },
+  {
+    "nome": "Carlos Souza",
+    "cpf": "22753188889",
+    "email": "teste@teste.com",
+    "cartao": "4072754764845336",
+    "valor": 17599,
+    "pais": "RU",
+    "tempoTransacaoSegundos": 7,
+    "timestamp": 1757459275291
+  },
+  {
+    "nome": "Carlos Souza",
+    "cpf": "68193390924",
+    "email": "cliente@empresa.com",
+    "cartao": "4376014950588877",
+    "valor": 19273,
+    "pais": "RU",
+    "tempoTransacaoSegundos": 89,
+    "timestamp": 1757459275297
+  },
+  {
+    "nome": "Diogo Ramos",
+    "cpf": "72012019837",
+    "email": "contato@mail.com",
+    "cartao": "4852125952566496",
+    "valor": 19913,
+    "pais": "IN",
+    "tempoTransacaoSegundos": 66,
+    "timestamp": 1757459275302
+  },
+  {
+    "nome": "Lucas Pereira",
+    "cpf": "10875476437",
+    "email": "fraude@suspeito.com",
+    "cartao": "4835079708022850",
+    "valor": 9235,
+    "pais": "BR",
+    "tempoTransacaoSegundos": 86,
+    "timestamp": 1757459275307
+  },
+  {
+    "nome": "Lucas Pereira",
+    "cpf": "40267098657",
+    "email": "contato@mail.com",
+    "cartao": "4073950615951232",
+    "valor": 17941,
+    "pais": "US",
+    "tempoTransacaoSegundos": 41,
+    "timestamp": 1757459275311
+  },
+  {
+    "nome": "Ana Silva",
+    "cpf": "42821078041",
+    "email": "user@example.com",
+    "cartao": "4237947745024455",
+    "valor": 310,
+    "pais": "US",
+    "tempoTransacaoSegundos": 14,
+    "timestamp": 1757459275315
+  },
+  {
+    "nome": "Diogo Ramos",
+    "cpf": "34832218786",
+    "email": "teste@teste.com",
+    "cartao": "4566535351022882",
+    "valor": 8008,
+    "pais": "RU",
+    "tempoTransacaoSegundos": 42,
+    "timestamp": 1757459275319
   }
 ]
