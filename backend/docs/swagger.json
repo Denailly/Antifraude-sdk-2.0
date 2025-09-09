@@ -1,60 +1,118 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
   "info": {
-    "title": "API Antifraude",
-    "version": "1.0.0"
+    "title": "API do SDK Antifraude 2.0",
+    "description": "API para análise de risco de transações em tempo real, fornecendo um score de confiança e um status acionável.",
+    "version": "2.0.0"
   },
-  "basePath": "/api",
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de desenvolvimento local"
+    }
+  ],
   "paths": {
-    "/verificar": {
+    "/identity/verify": {
       "post": {
-        "summary": "Verifica se uma transação é fraudulenta",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "transacao",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "nome": { "type": "string" },
-                "cpf": { "type": "string" },
-                "email": { "type": "string" },
-                "cartao": { "type": "string" },
-                "valor": { "type": "number" },
-                "pais": { "type": "string" },
-                "tempoTransacaoSegundos": { "type": "number" }
-              },
-              "required": ["nome", "cpf", "email", "cartao", "valor", "pais", "tempoTransacaoSegundos"]
+        "summary": "Verifica o risco de uma transação",
+        "description": "Recebe os dados de uma transação, processa através de um motor de 11 regras concorrentes e retorna uma análise de risco completa.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DadosTransacao"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": "Resultado da verificação",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "aprovado": { "type": "boolean" },
-                "motivos": {
-                  "type": "array",
-                  "items": { "type": "string" }
+            "description": "Análise de risco concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoAnalise"
                 }
               }
             }
           }
         }
       }
-    },
-    "/testes": {
-      "get": {
-        "summary": "Gera uma transação fake aleatória",
-        "responses": {
-          "200": {
-            "description": "Transação fake",
-            "schema": {
-              "type": "object"
-            }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DadosTransacao": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Maria Oliveira"
+          },
+          "cpf": {
+            "type": "string",
+            "example": "12345678901"
+          },
+          "email": {
+            "type": "string",
+            "example": "maria.oliveira@example.com"
+          },
+          "cartao": {
+            "type": "string",
+            "example": "4922339639040850"
+          },
+          "valor": {
+            "type": "number",
+            "example": 2233
+          },
+          "pais": {
+            "type": "string",
+            "example": "BR"
+          },
+          "tempoTransacaoSegundos": {
+            "type": "integer",
+            "example": 36
+          },
+          "ip": {
+            "type": "string",
+            "example": "189.55.201.10"
+          }
+        },
+        "required": [
+          "nome",
+          "cpf",
+          "email",
+          "cartao",
+          "valor",
+          "pais",
+          "tempoTransacaoSegundos"
+        ]
+      },
+      "ResultadoAnalise": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "A decisão final da análise.",
+            "enum": ["allow", "review", "deny"],
+            "example": "review"
+          },
+          "score": {
+            "type": "integer",
+            "description": "Um score de confiança de 0 (risco máximo) a 100 (confiança máxima).",
+            "example": 50
+          },
+          "suspeitas": {
+            "type": "array",
+            "description": "Uma lista detalhada dos fatores de risco encontrados.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Número de cartão inválido (verificação Luhn falhou).",
+              "Transação originada de um país inesperado: RU."
+            ]
           }
         }
       }
